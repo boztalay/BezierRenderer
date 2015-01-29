@@ -5,7 +5,6 @@ WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
 
 POINT_RADIUS = 3
-POINT_COLOR = "black"
 
 STATE_IDLE = 0
 STATE_PLACING = 1
@@ -23,23 +22,36 @@ canvas.pack()
 
 bezierCurves = []
 
-def drawPoint(point):
+def drawPoint(point, color):
     canvas.create_oval(point.x - POINT_RADIUS, point.y - POINT_RADIUS,
                        point.x + POINT_RADIUS, point.y + POINT_RADIUS,
-                       outline=POINT_COLOR)
+                       outline=color, fill="white")
+
+def drawLine(point1, point2, color):
+    canvas.create_line(point1.x, point1.y, point2.x, point2.y, fill=color)
+
+def drawDashedLine(point1, point2, color):
+    canvas.create_line(point1.x, point1.y, point2.x, point2.y, dash=(4, 4), fill=color)
 
 def renderBezierCurve(bezierCurve):
-    if bezierCurve.origin1 is not None:
-        drawPoint(bezierCurve.origin1)
-    if bezierCurve.origin2 is not None:
-        drawPoint(bezierCurve.origin2)
-    if bezierCurve.handle1 is not None:
-        drawPoint(bezierCurve.handle1)
-    if bezierCurve.handle2 is not None:
-        drawPoint(bezierCurve.handle2)
+    if bezierCurve.origin1 is not None and bezierCurve.origin2 is not None:
+        drawDashedLine(bezierCurve.origin1, bezierCurve.origin2, "gray")
+    if bezierCurve.origin1 is not None and bezierCurve.handle1 is not None:
+        drawLine(bezierCurve.origin1, bezierCurve.handle1, "blue")
+    if bezierCurve.origin2 is not None and bezierCurve.handle2 is not None:
+        drawLine(bezierCurve.origin2, bezierCurve.handle2, "blue")
 
-    if bezierCurve.isReadyToRender():
-        print "rendercurve"
+    if bezierCurve.origin1 is not None:
+        drawPoint(bezierCurve.origin1, "black")
+    if bezierCurve.origin2 is not None:
+        drawPoint(bezierCurve.origin2, "black")
+    if bezierCurve.handle1 is not None:
+        drawPoint(bezierCurve.handle1, "black")
+    if bezierCurve.handle2 is not None:
+        drawPoint(bezierCurve.handle2, "black")
+
+    #if bezierCurve.isReadyToRender():
+        #print "rendercurve"
 
 def renderAll():
     canvas.delete("all")
@@ -66,7 +78,6 @@ def getNearbyBezierCurve(clickPoint):
 def placeNewBezierCurve(clickPoint):
     global state
     global curveBeingPlaced
-    print "place new"
 
     state = STATE_PLACING
 
@@ -79,16 +90,19 @@ def placeNewBezierCurve(clickPoint):
 def stopPlacingNewBezierCurve(clickPoint):
     global state
     global curveBeingPlaced
-    print "stop place"
+
+    curveBeingPlaced.handle1 = Point(curveBeingPlaced.origin1.x, curveBeingPlaced.origin1.y - 30)
+    curveBeingPlaced.handle2 = Point(curveBeingPlaced.origin2.x, curveBeingPlaced.origin2.y - 30)
 
     state = STATE_IDLE
     curveBeingPlaced = None
+
+    renderAll()
 
 def startMovingBezierCurve(bezierCurve, pointType):
     global state
     global curveBeingMoved
     global pointTypeBeingMoved
-    print "move"
 
     state = STATE_MOVING
     curveBeingMoved = bezierCurve
@@ -98,7 +112,6 @@ def stopMovingBezierCurve(clickPoint):
     global state
     global curveBeingMoved
     global pointTypeBeingMoved
-    print "stop move"
 
     state = STATE_IDLE
     curveBeingMoved = None
