@@ -15,26 +15,26 @@ class BezierCurve():
     def isReadyToRender(self):
         return (self.origin1 is not None and self.origin2 is not None and self.handle1 is not None and self.handle2 is not None)
 
-    def render(canvas):
+    def render(self, canvas):
         # Actual Bezier curve
 
         # Lines between the origins and handles
         if self.origin1 is not None and self.origin2 is not None:
-            drawDashedLine(self.origin1, self.origin2, "gray")
+            drawDashedLine(canvas, self.origin1, self.origin2, "gray")
         if self.origin1 is not None and self.handle1 is not None:
-            drawLine(self.origin1, self.handle1, "blue")
+            drawLine(canvas, self.origin1, self.handle1, "blue")
         if self.origin2 is not None and self.handle2 is not None:
-            drawLine(self.origin2, self.handle2, "blue")
+            drawLine(canvas, self.origin2, self.handle2, "blue")
 
         # Points themselves
         if self.origin1 is not None:
-            drawPoint(self.origin1, "black")
+            drawPoint(canvas, self.origin1, "black")
         if self.origin2 is not None:
-            drawPoint(self.origin2, "black")
+            drawPoint(canvas, self.origin2, "black")
         if self.handle1 is not None:
-            drawPoint(self.handle1, "black")
+            drawPoint(canvas, self.handle1, "black")
         if self.handle2 is not None:
-            drawPoint(self.handle2, "black")
+            drawPoint(canvas, self.handle2, "black")
 
     def closestPointTo(self, point):
         if self.origin1 is not None:
