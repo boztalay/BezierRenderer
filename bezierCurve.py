@@ -1,16 +1,4 @@
-import math
-
-class Point():
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def set(self, otherPoint):
-        self.x = otherPoint.x
-        self.y = otherPoint.y
-
-    def distanceTo(self, otherPoint):
-        return math.sqrt(pow(self.x - otherPoint.x, 2) + pow(self.y - otherPoint.y, 2))
+from basics import *
 
 CURVE_ORIGIN_1 = 0
 CURVE_ORIGIN_2 = 1
@@ -26,6 +14,27 @@ class BezierCurve():
 
     def isReadyToRender(self):
         return (self.origin1 is not None and self.origin2 is not None and self.handle1 is not None and self.handle2 is not None)
+
+    def render(canvas):
+        # Actual Bezier curve
+
+        # Lines between the origins and handles
+        if self.origin1 is not None and self.origin2 is not None:
+            drawDashedLine(self.origin1, self.origin2, "gray")
+        if self.origin1 is not None and self.handle1 is not None:
+            drawLine(self.origin1, self.handle1, "blue")
+        if self.origin2 is not None and self.handle2 is not None:
+            drawLine(self.origin2, self.handle2, "blue")
+
+        # Points themselves
+        if self.origin1 is not None:
+            drawPoint(self.origin1, "black")
+        if self.origin2 is not None:
+            drawPoint(self.origin2, "black")
+        if self.handle1 is not None:
+            drawPoint(self.handle1, "black")
+        if self.handle2 is not None:
+            drawPoint(self.handle2, "black")
 
     def closestPointTo(self, point):
         if self.origin1 is not None:

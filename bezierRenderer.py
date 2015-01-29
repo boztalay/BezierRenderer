@@ -1,10 +1,10 @@
 from Tkinter import *
-from dataTypes import *
+
+from basics import *
+from bezierCurve import *
 
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
-
-POINT_RADIUS = 3
 
 STATE_IDLE = 0
 STATE_PLACING = 1
@@ -22,41 +22,10 @@ canvas.pack()
 
 bezierCurves = []
 
-def drawPoint(point, color):
-    canvas.create_oval(point.x - POINT_RADIUS, point.y - POINT_RADIUS,
-                       point.x + POINT_RADIUS, point.y + POINT_RADIUS,
-                       outline=color, fill="white")
-
-def drawLine(point1, point2, color):
-    canvas.create_line(point1.x, point1.y, point2.x, point2.y, fill=color)
-
-def drawDashedLine(point1, point2, color):
-    canvas.create_line(point1.x, point1.y, point2.x, point2.y, dash=(4, 4), fill=color)
-
-def renderBezierCurve(bezierCurve):
-    if bezierCurve.origin1 is not None and bezierCurve.origin2 is not None:
-        drawDashedLine(bezierCurve.origin1, bezierCurve.origin2, "gray")
-    if bezierCurve.origin1 is not None and bezierCurve.handle1 is not None:
-        drawLine(bezierCurve.origin1, bezierCurve.handle1, "blue")
-    if bezierCurve.origin2 is not None and bezierCurve.handle2 is not None:
-        drawLine(bezierCurve.origin2, bezierCurve.handle2, "blue")
-
-    if bezierCurve.origin1 is not None:
-        drawPoint(bezierCurve.origin1, "black")
-    if bezierCurve.origin2 is not None:
-        drawPoint(bezierCurve.origin2, "black")
-    if bezierCurve.handle1 is not None:
-        drawPoint(bezierCurve.handle1, "black")
-    if bezierCurve.handle2 is not None:
-        drawPoint(bezierCurve.handle2, "black")
-
-    #if bezierCurve.isReadyToRender():
-        #print "rendercurve"
-
 def renderAll():
     canvas.delete("all")
     for bezierCurve in bezierCurves:
-        renderBezierCurve(bezierCurve)
+        bezierCurve.render(canvas)
 
 def getNearbyBezierCurve(clickPoint):
     closestCurve = None
