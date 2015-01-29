@@ -39,7 +39,7 @@ def getNearbyBezierCurve(clickPoint):
             closestDistance = distance
             closestPointType = pointType
 
-    if closestDistance is not None and closestDistance < 5:
+    if closestDistance is not None and closestDistance < 7:
         return (closestCurve, closestPointType)
     else:
         return (None, None)
