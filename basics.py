@@ -33,3 +33,15 @@ def pointBetweenPoints(point1, point2, proportion):
     yOffset = yDifference * proportion
 
     return Point(point1.x + xOffset, point1.y + yOffset)
+
+def clampPointToBounds(point, boundX, boundY, margin):
+    if point.x < 0 + margin:
+        point.x = 0 + margin
+    elif point.x > boundX - margin:
+        point.x = boundX - margin
+
+    if point.y < 0 + margin:
+        point.y = 0 + margin
+    elif point.y > boundY - margin:
+        point.y = boundY - margin
+

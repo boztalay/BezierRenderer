@@ -17,7 +17,7 @@ pointTypeBeingMoved = None
 
 master = Tk()
 master.resizable(width=False, height=False)
-canvas = Canvas(master, width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
+canvas = Canvas(master, width=WINDOW_WIDTH, height=WINDOW_HEIGHT, highlightthickness=0)
 canvas.pack()
 
 bezierCurves = []
@@ -88,6 +88,7 @@ def stopMovingBezierCurve(clickPoint):
 
 def mouseClicked(event):
     clickPoint = Point(event.x, event.y)
+    clampPointToBounds(clickPoint, WINDOW_WIDTH, WINDOW_HEIGHT, 5)
 
     if state is STATE_IDLE:
         bezierCurve, pointType = getNearbyBezierCurve(clickPoint)
@@ -106,6 +107,7 @@ def mouseMoved(event):
     global pointTypeBeingMoved
 
     mousePos = Point(event.x, event.y)
+    clampPointToBounds(mousePos, WINDOW_WIDTH, WINDOW_HEIGHT, 5)
 
     if state is STATE_PLACING:
         curveBeingPlaced.origin2 = mousePos
