@@ -19,11 +19,21 @@ def drawPoint(canvas, point, color):
                        point.x + POINT_RADIUS, point.y + POINT_RADIUS,
                        outline=color, fill="white")
 
-def drawLine(canvas, point1, point2, color):
-    canvas.create_line(point1.x, point1.y, point2.x, point2.y, fill=color)
+def buildCoordinatesListFromPoints(points):
+    pointCoords = []
+    for point in points:
+        pointCoords.append(point.x)
+        pointCoords.append(point.y)
 
-def drawDashedLine(canvas, point1, point2, color):
-    canvas.create_line(point1.x, point1.y, point2.x, point2.y, dash=(4, 4), fill=color)
+    return pointCoords
+
+def drawLine(canvas, points, color):
+    pointCoords = buildCoordinatesListFromPoints(points)
+    canvas.create_line(pointCoords, fill=color)
+
+def drawDashedLine(canvas, points, color):
+    pointCoords = buildCoordinatesListFromPoints(points)
+    canvas.create_line(pointCoords, dash=(4, 4), fill=color)
 
 def pointBetweenPoints(point1, point2, proportion):
     xDifference = point2.x - point1.x
