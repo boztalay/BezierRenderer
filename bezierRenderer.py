@@ -153,7 +153,21 @@ def toggleIntermediateRendering(event):
 
     for bezierCurve in bezierCurves:
         bezierCurve.setNeedsRender()
+    renderAll()
 
+def moveIntermediates(event):
+    if event.keysym == "Right":
+        BezierCurve.intermediateStep += 0.01
+    elif event.keysym == "Left":
+        BezierCurve.intermediateStep -= 0.01
+
+    if BezierCurve.intermediateStep < 0.0:
+        BezierCurve.intermediateStep = 0.0;
+    elif BezierCurve.intermediateStep > 1.0:
+        BezierCurve.intermediateStep = 1.0
+
+    for bezierCurve in bezierCurves:
+        bezierCurve.setNeedsRender()
     renderAll()
 
 def clear(event):
@@ -169,6 +183,8 @@ master.bind("<Button-1>", mouseClicked)
 master.bind("<Motion>", mouseMoved)
 master.bind("p", placeKeyPressed)
 master.bind("i", toggleIntermediateRendering)
+master.bind("<Left>", moveIntermediates)
+master.bind("<Right>", moveIntermediates)
 master.bind("c", clear)
 master.bind("q", quit)
 mainloop()

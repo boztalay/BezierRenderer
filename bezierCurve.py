@@ -4,6 +4,7 @@ STEP_SIZE = 1.0 / 100.0;
 
 class BezierCurve():
     intermediateRendering = False
+    intermediateStep = 0.50
     intermediateColorPalette = ["green", "red", "blue", "cyan", "magenta"]
 
     def __init__(self, firstPoint):
@@ -39,7 +40,14 @@ class BezierCurve():
         drawLine(canvas, self.curvePoints, "black")
 
     def getPointOnCurveAtStep(self, canvas, points, step):
+        shouldDrawIntermediates = False
+        if BezierCurve.intermediateRendering and areFloatsEqual(step, BezierCurve.intermediateStep):
+            intermediateColor = BezierCurve.intermediateColorPalette[len(points) % len(BezierCurve.intermediateColorPalette)]
+            shouldDrawIntermediates = True
+
         if len(points) == 1:
+            if shouldDrawIntermediates:
+                drawPoint(canvas, points[0], intermediateColor)
             return points[0]
         else:
             intermediatePoints = []
@@ -48,8 +56,7 @@ class BezierCurve():
                 newPoint = pointBetweenPoints(point, points[i + 1], step)
                 intermediatePoints.append(newPoint)
 
-            if step > 0.499 and step < 0.501 and BezierCurve.intermediateRendering and len(intermediatePoints) > 1:
-                intermediateColor = BezierCurve.intermediateColorPalette[len(intermediatePoints) % len(BezierCurve.intermediateColorPalette)]
+            if shouldDrawIntermediates and len(intermediatePoints) > 1:
                 drawLine(canvas, intermediatePoints, intermediateColor)
                 for point in intermediatePoints:
                     drawPoint(canvas, point, intermediateColor)
