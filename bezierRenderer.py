@@ -140,9 +140,19 @@ def mouseMoved(event):
         curveBeingPlaced.points.pop()
         curveBeingPlaced.points.append(mousePos)
         curveBeingPlaced.setNeedsRender()
+        renderAll()
     elif state is STATE_MOVING:
         pointBeingMoved.set(mousePos)
         curveBeingMoved.setNeedsRender()
+        renderAll()
+
+def toggleIntermediateRendering(event):
+    global bezierCurves
+
+    BezierCurve.intermediateRendering = not BezierCurve.intermediateRendering
+
+    for bezierCurve in bezierCurves:
+        bezierCurve.setNeedsRender()
 
     renderAll()
 
@@ -158,6 +168,7 @@ def quit(event):
 master.bind("<Button-1>", mouseClicked)
 master.bind("<Motion>", mouseMoved)
 master.bind("p", placeKeyPressed)
+master.bind("i", toggleIntermediateRendering)
 master.bind("c", clear)
 master.bind("q", quit)
 mainloop()

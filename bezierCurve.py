@@ -3,14 +3,17 @@ from basics import *
 STEP_SIZE = 1.0 / 100.0;
 
 class BezierCurve():
+    intermediateRendering = False
+    intermediateColorPalette = ["green", "red", "blue", "cyan", "magenta"]
+
     def __init__(self, firstPoint):
         self.points = [firstPoint]
         self.needsRender = True
+        self.curvePoints = []
 
     def render(self, canvas):
         # Actual Bezier curve
-        if self.shouldRender():
-            self.renderCurve(canvas)
+        self.renderCurve(canvas)
 
         # Lines between the points
         if len(self.points) > 1:
@@ -21,18 +24,21 @@ class BezierCurve():
             drawPoint(canvas, point, "black")
 
     def renderCurve(self, canvas):
-        currentStep = 0.0
-        pointsOnCurve = []
+        if self.shouldRender():
+            currentStep = 0.0
+            self.curvePoints = []
 
-        while currentStep <= 1.0:
-            pointOnCurve = self.getPointOnCurveAtStep(self.points, currentStep)
-            pointsOnCurve.append(pointOnCurve)
-            currentStep += STEP_SIZE
-        pointsOnCurve.append(self.points[-1])
+            while currentStep <= 1.0:
+                pointOnCurve = self.getPointOnCurveAtStep(canvas, self.points, currentStep)
+                self.curvePoints.append(pointOnCurve)
+                currentStep += STEP_SIZE
 
-        drawLine(canvas, pointsOnCurve, "black")
+            self.curvePoints.append(self.points[-1])
+            self.needsRender = False
 
-    def getPointOnCurveAtStep(self, points, step):
+        drawLine(canvas, self.curvePoints, "black")
+
+    def getPointOnCurveAtStep(self, canvas, points, step):
         if len(points) == 1:
             return points[0]
         else:
@@ -42,7 +48,13 @@ class BezierCurve():
                 newPoint = pointBetweenPoints(point, points[i + 1], step)
                 intermediatePoints.append(newPoint)
 
-            return self.getPointOnCurveAtStep(intermediatePoints, step)
+            if step > 0.499 and step < 0.501 and BezierCurve.intermediateRendering and len(intermediatePoints) > 1:
+                intermediateColor = BezierCurve.intermediateColorPalette[len(intermediatePoints) % len(BezierCurve.intermediateColorPalette)]
+                drawLine(canvas, intermediatePoints, intermediateColor)
+                for point in intermediatePoints:
+                    drawPoint(canvas, point, intermediateColor)
+
+            return self.getPointOnCurveAtStep(canvas, intermediatePoints, step)
 
     def shouldRender(self):
         return (self.needsRender and self.isReadyToRender())
@@ -52,6 +64,9 @@ class BezierCurve():
 
     def isReadyToRender(self):
         return (len(self.points) > 1)
+
+    def toggleIntermediateRendering(self):
+        self.intermediateRendering = not self.intermediateRendering
 
     def closestPointTo(self, point):
         closestPoint = None
