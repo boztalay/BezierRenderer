@@ -29,7 +29,7 @@ class BezierCurve():
             currentStep = 0.0
             self.curvePoints = []
 
-            while currentStep <= 1.0:
+            while currentStep < 1.0 or areFloatsEqual(currentStep, 1.0):
                 pointOnCurve = self.getPointOnCurveAtStep(canvas, self.points, currentStep)
                 self.curvePoints.append(pointOnCurve)
                 currentStep += STEP_SIZE

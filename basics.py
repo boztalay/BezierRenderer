@@ -56,7 +56,7 @@ def clampPointToBounds(point, boundX, boundY, margin):
         point.y = boundY - margin
 
 def areFloatsEqual(float1, float2):
-    if float1 > float2 - 0.001 and float1 < float2 + 0.001:
+    if float1 > (float2 - 0.001) and float1 < (float2 + 0.001):
         return True
     else:
         return False
