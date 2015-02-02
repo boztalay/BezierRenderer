@@ -1,3 +1,4 @@
+import time
 from Tkinter import *
 
 from basics import *
@@ -5,6 +6,11 @@ from bezierCurve import *
 
 WINDOW_WIDTH = 1000
 WINDOW_HEIGHT = 600
+
+TARGET_FRAME_TIME = 20
+
+MOVEMENT_CLICK_RADIUS = 7
+BORDER_MARGIN = 5
 
 STATE_IDLE = 0
 STATE_PLACING = 1
@@ -26,9 +32,17 @@ def renderAll():
     global canvas
     global bezierCurves
 
+    startTime = time.time()
+
     canvas.delete("all")
     for bezierCurve in bezierCurves:
         bezierCurve.render(canvas)
+
+    secondsElapsed = time.time() - startTime
+    millisecondsElapsed = int(round(secondsElapsed))
+    frameTime = max(0, TARGET_FRAME_TIME - millisecondsElapsed)
+
+    master.after(frameTime, renderAll)
 
 def getNearbyBezierCurve(clickPoint):
     global bezierCurves
@@ -44,7 +58,7 @@ def getNearbyBezierCurve(clickPoint):
             closestDistance = distance
             closestPoint = point
 
-    if closestDistance is not None and closestDistance < 7:
+    if closestDistance is not None and closestDistance < MOVEMENT_CLICK_RADIUS:
         return (closestPoint, closestCurve)
     else:
         return (None, None)
@@ -57,32 +71,25 @@ def startPlacingNewBezierCurve(clickPoint):
     state = STATE_PLACING
 
     newCurve = BezierCurve(clickPoint)
-    newCurve.points.append(Point(clickPoint.x, clickPoint.y))
-    bezierCurves.append(newCurve)
+    newCurve.addPoint(Point(clickPoint.x, clickPoint.y))
 
+    bezierCurves.append(newCurve)
     curveBeingPlaced = newCurve
-    renderAll()
 
 def continuePlacingNewBezierCurve(clickPoint):
     global curveBeingPlaced
 
-    curveBeingPlaced.points.append(Point(clickPoint.x, clickPoint.y))
-    curveBeingPlaced.setNeedsRender()
-
-    renderAll()
+    curveBeingPlaced.addPoint(Point(clickPoint.x, clickPoint.y))
 
 def stopPlacingNewBezierCurve():
     global state
     global curveBeingPlaced
 
     if curveBeingPlaced is not None:
-        curveBeingPlaced.points.pop()
-        curveBeingPlaced.setNeedsRender()
+        curveBeingPlaced.removeLastPoint()
 
     state = STATE_IDLE
     curveBeingPlaced = None
-
-    renderAll()
 
 def startMovingPointOnCurve(point, curve):
     global state
@@ -93,8 +100,6 @@ def startMovingPointOnCurve(point, curve):
     pointBeingMoved = point
     curveBeingMoved = curve
 
-    renderAll()
-
 def stopMovingPointOnCurve():
     global state
     global curveBeingMoved
@@ -104,8 +109,6 @@ def stopMovingPointOnCurve():
     curveBeingMoved = None
     pointBeingMoved = None
 
-    renderAll()
-
 def placeKeyPressed(event):
     if state is STATE_PLACING:
         stopPlacingNewBezierCurve()
@@ -114,7 +117,7 @@ def mouseClicked(event):
     global state
 
     clickPoint = Point(event.x, event.y)
-    clampPointToBounds(clickPoint, WINDOW_WIDTH, WINDOW_HEIGHT, 5)
+    clampPointToBounds(clickPoint, WINDOW_WIDTH, WINDOW_HEIGHT, BORDER_MARGIN)
 
     if state is STATE_IDLE:
         point, bezierCurve = getNearbyBezierCurve(clickPoint)
@@ -134,26 +137,21 @@ def mouseMoved(event):
     global pointBeingMoved
 
     mousePos = Point(event.x, event.y)
-    clampPointToBounds(mousePos, WINDOW_WIDTH, WINDOW_HEIGHT, 5)
+    clampPointToBounds(mousePos, WINDOW_WIDTH, WINDOW_HEIGHT, BORDER_MARGIN)
 
     if state is STATE_PLACING:
-        curveBeingPlaced.points.pop()
-        curveBeingPlaced.points.append(mousePos)
-        curveBeingPlaced.setNeedsRender()
-        renderAll()
+        curveBeingPlaced.removeLastPoint()
+        curveBeingPlaced.addPoint(mousePos)
     elif state is STATE_MOVING:
         pointBeingMoved.set(mousePos)
         curveBeingMoved.setNeedsRender()
-        renderAll()
 
 def toggleIntermediateRendering(event):
     global bezierCurves
 
     BezierCurve.intermediateRendering = not BezierCurve.intermediateRendering
-
     for bezierCurve in bezierCurves:
-        bezierCurve.setNeedsRender()
-    renderAll()
+        bezierCurve.setNeedsIntermediateRender()
 
 def moveIntermediates(event):
     if event.keysym == "Right":
@@ -167,14 +165,13 @@ def moveIntermediates(event):
         BezierCurve.intermediateStep = 1.0
 
     for bezierCurve in bezierCurves:
-        bezierCurve.setNeedsRender()
-    renderAll()
+        bezierCurve.setNeedsIntermediateRender()
 
 def clear(event):
     global bezierCurves
 
-    del(bezierCurves[:])
-    renderAll()
+    if state is STATE_IDLE:
+        del(bezierCurves[:])
 
 def quit(event):
     master.quit()
@@ -187,4 +184,7 @@ master.bind("<Left>", moveIntermediates)
 master.bind("<Right>", moveIntermediates)
 master.bind("c", clear)
 master.bind("q", quit)
+
+master.after(TARGET_FRAME_TIME, renderAll)
+
 mainloop()

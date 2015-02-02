@@ -10,22 +10,57 @@ class BezierCurve():
     def __init__(self, firstPoint):
         self.points = [firstPoint]
         self.needsRender = True
+        self.needsIntermediateRender = True
         self.curvePoints = []
+        self.intermediatePoints = []
 
     def render(self, canvas):
-        # Actual Bezier curve
-        self.renderCurve(canvas)
-
         # Lines between the points
         if len(self.points) > 1:
             drawDashedLine(canvas, self.points, "gray")
+
+        # Actual Bezier curve
+        self.renderCurve(canvas)
 
         # The points
         for point in self.points:
             drawPoint(canvas, point, "black")
 
+        # Intermediates
+        self.renderIntermediates(canvas)
+
+    def renderIntermediates(self, canvas):
+        if not BezierCurve.intermediateRendering:
+            return
+
+        if self.needsIntermediateRender:
+            self.intermediatePoints = []
+            self.calculateIntermediates(canvas, self.points)
+            self.needsIntermediateRender = False
+
+        for intermediates in self.intermediatePoints:
+            intermediateColor = BezierCurve.intermediateColorPalette[len(intermediates) % len(BezierCurve.intermediateColorPalette)]
+
+            if len(intermediates) > 1:
+                drawLine(canvas, intermediates, intermediateColor)
+
+            for point in intermediates:
+                drawPoint(canvas, point, intermediateColor)
+
+    def calculateIntermediates(self, canvas, pointsToRender):
+        if len(pointsToRender) <= 0:
+            return
+
+        nextIntermediates = []
+        for i, point in enumerate(pointsToRender[:-1]):
+            newPoint = pointBetweenPoints(point, pointsToRender[i + 1], BezierCurve.intermediateStep)
+            nextIntermediates.append(newPoint)
+
+        self.intermediatePoints.append(nextIntermediates)
+        self.calculateIntermediates(canvas, nextIntermediates)
+
     def renderCurve(self, canvas):
-        if self.shouldRender():
+        if self.needsRender:
             currentStep = 0.0
             self.curvePoints = []
 
@@ -40,14 +75,7 @@ class BezierCurve():
         drawLine(canvas, self.curvePoints, "black")
 
     def getPointOnCurveAtStep(self, canvas, points, step):
-        shouldDrawIntermediates = False
-        if BezierCurve.intermediateRendering and areFloatsEqual(step, BezierCurve.intermediateStep):
-            intermediateColor = BezierCurve.intermediateColorPalette[len(points) % len(BezierCurve.intermediateColorPalette)]
-            shouldDrawIntermediates = True
-
         if len(points) == 1:
-            if shouldDrawIntermediates:
-                drawPoint(canvas, points[0], intermediateColor)
             return points[0]
         else:
             intermediatePoints = []
@@ -56,24 +84,22 @@ class BezierCurve():
                 newPoint = pointBetweenPoints(point, points[i + 1], step)
                 intermediatePoints.append(newPoint)
 
-            if shouldDrawIntermediates and len(intermediatePoints) > 1:
-                drawLine(canvas, intermediatePoints, intermediateColor)
-                for point in intermediatePoints:
-                    drawPoint(canvas, point, intermediateColor)
-
             return self.getPointOnCurveAtStep(canvas, intermediatePoints, step)
 
-    def shouldRender(self):
-        return (self.needsRender and self.isReadyToRender())
+    def addPoint(self, point):
+        self.points.append(point)
+        self.setNeedsRender()
+
+    def removeLastPoint(self):
+        self.points.pop()
+        self.setNeedsRender()
 
     def setNeedsRender(self):
         self.needsRender = True
+        self.setNeedsIntermediateRender()
 
-    def isReadyToRender(self):
-        return (len(self.points) > 1)
-
-    def toggleIntermediateRendering(self):
-        self.intermediateRendering = not self.intermediateRendering
+    def setNeedsIntermediateRender(self):
+        self.needsIntermediateRender = True
 
     def closestPointTo(self, point):
         closestPoint = None
@@ -86,3 +112,4 @@ class BezierCurve():
                 closestDistance = distance
 
         return (closestPoint, closestDistance)
+
