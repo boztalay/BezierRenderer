@@ -1,5 +1,5 @@
 # BezierRenderer
-A simple bezier curve renderer in Python that can render curves of arbitrary order.
+A simple bezier curve renderer in Python that can draw curves of arbitrary order.
 
 ![Screenshot](https://raw.githubusercontent.com/boztalay/BezierRenderer/master/curvy.png)
 
