@@ -11,4 +11,4 @@ To clear all of the curves, press `c`, and to quit, press `q`.
 
 If you want to see how the curves are drawn, hit `i` to toggle intermediate drawing and use the left and right arrow keys to see the rendering happen.
 
-![Screenshot](https://raw.githubusercontent.com/boztalay/BezierRenderer/master/intermediates.png)
+<p align="center"><img src="https://i.imgur.com/uxHDvrF.gif"/></p>
