@@ -29,6 +29,37 @@ class BezierCurve():
         # Intermediates
         self.renderIntermediates(canvas)
 
+    # The interesting bit, rendering the Bezier curve itself
+
+    def renderCurve(self, canvas):
+        if self.needsRender:
+            currentStep = 0.0
+            self.curvePoints = []
+
+            while currentStep < 1.0 or areFloatsEqual(currentStep, 1.0):
+                pointOnCurve = self.getPointOnCurveAtStep(canvas, self.points, currentStep)
+                self.curvePoints.append(pointOnCurve)
+                currentStep += STEP_SIZE
+
+            self.curvePoints.append(self.points[-1])
+            self.needsRender = False
+
+        drawLine(canvas, self.curvePoints, "black")
+
+    def getPointOnCurveAtStep(self, canvas, points, step):
+        if len(points) == 1:
+            return points[0]
+        else:
+            intermediatePoints = []
+
+            for i, point in enumerate(points[:-1]):
+                newPoint = pointBetweenPoints(point, points[i + 1], step)
+                intermediatePoints.append(newPoint)
+
+            return self.getPointOnCurveAtStep(canvas, intermediatePoints, step)
+
+    # Rendering the intermediate lines, if they're being shown
+
     def renderIntermediates(self, canvas):
         if not BezierCurve.intermediateRendering:
             return
@@ -59,32 +90,16 @@ class BezierCurve():
         self.intermediatePoints.append(nextIntermediates)
         self.calculateIntermediates(canvas, nextIntermediates)
 
-    def renderCurve(self, canvas):
-        if self.needsRender:
-            currentStep = 0.0
-            self.curvePoints = []
+    # These are used to tell the curve it should recalculate its curve and/or intermediates
 
-            while currentStep < 1.0 or areFloatsEqual(currentStep, 1.0):
-                pointOnCurve = self.getPointOnCurveAtStep(canvas, self.points, currentStep)
-                self.curvePoints.append(pointOnCurve)
-                currentStep += STEP_SIZE
+    def setNeedsRender(self):
+        self.needsRender = True
+        self.setNeedsIntermediateRender()
 
-            self.curvePoints.append(self.points[-1])
-            self.needsRender = False
+    def setNeedsIntermediateRender(self):
+        self.needsIntermediateRender = True
 
-        drawLine(canvas, self.curvePoints, "black")
-
-    def getPointOnCurveAtStep(self, canvas, points, step):
-        if len(points) == 1:
-            return points[0]
-        else:
-            intermediatePoints = []
-
-            for i, point in enumerate(points[:-1]):
-                newPoint = pointBetweenPoints(point, points[i + 1], step)
-                intermediatePoints.append(newPoint)
-
-            return self.getPointOnCurveAtStep(canvas, intermediatePoints, step)
+    # Making the curve longer or shorter
 
     def addPoint(self, point):
         self.points.append(point)
@@ -94,12 +109,7 @@ class BezierCurve():
         self.points.pop()
         self.setNeedsRender()
 
-    def setNeedsRender(self):
-        self.needsRender = True
-        self.setNeedsIntermediateRender()
-
-    def setNeedsIntermediateRender(self):
-        self.needsIntermediateRender = True
+    # Gets the closest point this curve has to the given point
 
     def closestPointTo(self, point):
         closestPoint = None
