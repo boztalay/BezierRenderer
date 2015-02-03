@@ -9,6 +9,6 @@ To move a points in an existing curve, just click them, then click to set their 
 
 To clear all of the curves, press `c`, and to quit, press `q`.
 
-If you want to see how the curves are drawn, hit `i` to toggle intermediate drawing and use the left and right arrow keys to see the rendering happen.
+If you want to see how the curves are drawn, hit `i` to toggle intermediate drawing and use the left and right arrow keys to see how the drawing happens.
 
 <p align="center"><img src="https://i.imgur.com/uxHDvrF.gif"/></p>
